@@ -2,15 +2,21 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/auth";
 import { handleSignOut } from "@/app/actions/authActions";
-
+import Image from 'next/image';
+import logo from '@/public/assets/DD_T9qPu.jpeg';
 export default async function Navbar() {
   const session = await auth();
   console.log({ session });
   return (
     <nav className="flex justify-between items-center py-3 px-4 bg-white shadow-md">
       <Link href="/" className="text-xl font-bold">
-        <img src="/public/DD_T9qPu.jpeg"/> 
-        Chat LAW
+       <Image
+          src={logo}
+          alt="Logo"
+          width={50}
+          height={250}
+        />
+       
       </Link>
       {!session ? (
         <Link href="/auth/signin">

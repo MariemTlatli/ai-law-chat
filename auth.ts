@@ -56,6 +56,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       const { pathname } = nextUrl;
       const role = auth?.user?.role || 'user';
 
+      // Autoriser l'accès à /auth/signup sans connexion
+    if (pathname.startsWith('/auth/signup')) {
+      return true; // ✅ Accès libre
+    }
       // Redirection si déjà connecté
       if (pathname.startsWith('/auth/signin') && isLoggedIn) {
         return Response.redirect(new URL('/', nextUrl));
