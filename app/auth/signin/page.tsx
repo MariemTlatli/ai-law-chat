@@ -1,127 +1,51 @@
+// /app/auth/signin/page.tsx
 "use client";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-
-import { GitHubLogoIcon } from "@radix-ui/react-icons";
-
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-
-import { signInSchema } from "@/lib/zod";
-import LoadingButton from "@/components/loading-button";
-import {
-    handleCredentialsSignin,
-    handleGithubSignin,
-} from "@/app/actions/authActions";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import ErrorMessage from "@/components/error-message";
-import { Button } from "@/components/ui/button";
 
-export default function SignIn() {
-    const [globalError, setGlobalError] = useState<string>("");
-    const form = useForm<z.infer<typeof signInSchema>>({
-        resolver: zodResolver(signInSchema),
-        defaultValues: {
-            email: "",
-            password: "",
-        },
+export default function SignInForm() {
+  const router = useRouter();
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    const result = await signIn("credentials", {
+      email: formData.get("email"),
+      password: formData.get("password"),
+      redirect: false,
     });
 
-    const onSubmit = async (values: z.infer<typeof signInSchema>) => {
-        try {
-            const result = await handleCredentialsSignin(values);
-            if (result?.message) {
-                setGlobalError(result.message);
-            }
-        } catch (error) {
-            console.log("An unexpected error occurred. Please try again.");
-        }
-    };
+    if (result?.error) {
+      setError("Email ou mot de passe incorrect");
+    } else {
+      // Redirection dynamique selon le rôle
+      const session = await fetch("/api/session").then(res => res.json());
+      const role = session.user?.role;
 
-    return (
-        <div className="flex items-center justify-center min-h-screen p-4">
-            <Card className="w-full max-w-md">
-                <CardHeader>
-                    <CardTitle className="text-3xl font-bold text-center text-gray-800">
-                        Welcome Back
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {globalError && <ErrorMessage error={globalError} />}
-                    <Form {...form}>
-                        <form
-                            onSubmit={form.handleSubmit(onSubmit)}
-                            className="space-y-8"
-                        >
-                            <FormField
-                                control={form.control}
-                                name="email"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Email</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="email"
-                                                placeholder="Enter your email address"
-                                                autoComplete="off"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+      if (role === "admin") {
+        router.push("/page2");
+      } else {
+        router.push("/page1");
+      }
 
-                            <FormField
-                                control={form.control}
-                                name="password"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Password</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="password"
-                                                placeholder="Enter password"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+      router.refresh();
+    }
+  };
 
-                            {/* Submit button will go here */}
-                            <LoadingButton
-                                pending={form.formState.isSubmitting}
-                            />
-                        </form>
-                    </Form>
-
-                    <span className="text-sm text-gray-500 text-center block my-2">
-                        or
-                    </span>
-                    <form className="w-full" action={handleGithubSignin}>
-                        <Button
-                            variant="outline"
-                            className="w-full"
-                            type="submit"
-                        >
-                            <GitHubLogoIcon className="h-4 w-4 mr-2" />
-                            Sign in with GitHub
-                        </Button>
-                    </form>
-                </CardContent>
-            </Card>
-        </div>
-    );
+  return (
+    <div>
+      <h1>Se connecter</h1>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      <form onSubmit={handleSubmit}>
+        <input name="email" placeholder="Email" required />
+        <br />
+        <input name="password" type="password" placeholder="Mot de passe" required />
+        <br />
+        <button type="submit">Se connecter</button>
+      </form>
+    </div>
+  );
 }

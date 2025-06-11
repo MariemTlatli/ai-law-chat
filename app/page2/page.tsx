@@ -1,3 +1,11 @@
-export default function Page2() {
-  return <h1>Can only be accessed by admin user.</h1>;
+import { auth } from "@/auth";
+
+export default async function AdminPage() {
+  const session = await auth();
+
+  if (!session?.user || session.user.role !== "admin") {
+    return <div>Access Denied</div>;
+  }
+
+  return <div>Bienvenue, administrateur !</div>;
 }
