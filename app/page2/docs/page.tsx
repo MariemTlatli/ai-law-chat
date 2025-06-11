@@ -1,7 +1,7 @@
 'use client';
 
-import { auth } from '@/lib/auth';
 import { useState } from 'react';
+import axios from 'axios';
 
 type Message = {
   role: 'user' | 'bot';
@@ -9,26 +9,49 @@ type Message = {
 };
 
 export default function DocsPage() {
-
-  //  const session = await auth();
-
-  // if (!session?.user || session.user.role !== "admin") {
-  //   return <div>Access Denied</div>;
-  // }
   const [messages, setMessages] = useState<Message[]>([
     { role: 'bot', content: 'Bonjour ! Pose-moi une question.' },
   ]);
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // Pour gérer l'indicateur de chargement
 
-  const handleSubmit = (e: React.FormEvent) => {
+ const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
 
     const userMsg: Message = { role: 'user', content: input };
-    const botMsg: Message = { role: 'bot', content: "Merci pour ton message !" };
 
-    setMessages([...messages, userMsg, botMsg]);
+    // Ajouter le message utilisateur
+    setMessages((prev) => [...prev, userMsg]);
     setInput('');
+    setIsLoading(true);
+
+    try {
+      // Envoi via POST avec body
+      const response = await axios.post('http://localhost:8000/router', { "current_query": input });
+console.log("***************response.data ******************** \n")
+console.log(response.data)
+var resp = response.data 
+console.log(resp.content)
+console.log(resp.type)
+
+
+      const botMsg: Message = {
+        role: 'bot',
+        content: resp.content || "Aucune réponse reçue.",
+      };
+
+      // Ajouter la réponse du bot
+      setMessages((prev) => [...prev, botMsg]);
+    } catch (error) {
+      console.error(error);
+      setMessages((prev) => [
+        ...prev,
+        { role: 'bot', content: "Erreur lors de la récupération de la réponse." },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -42,11 +65,15 @@ export default function DocsPage() {
         <MultimodalInput input={input} setInput={setInput} />
         <button
           type="submit"
-          className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+          className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+          disabled={isLoading}
         >
-          Envoyer
+          {isLoading ? 'Envoi...' : 'Envoyer'}
         </button>
       </form>
+      {isLoading && (
+        <div className="text-center text-sm text-gray-500">Réception de la réponse...</div>
+      )}
     </div>
   );
 }
@@ -54,7 +81,7 @@ export default function DocsPage() {
 export function ChatHeader() {
   return (
     <div className="w-full px-4 py-3 border-b shadow-sm bg-white text-center">
-      <h1 className="text-lg font-bold">Chat statique</h1>
+      <h1 className="text-lg font-bold">Chat dynamique</h1>
     </div>
   );
 }
