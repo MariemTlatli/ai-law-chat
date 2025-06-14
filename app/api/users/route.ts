@@ -1,6 +1,6 @@
 // app/api/users/route.ts
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import prisma from '@/lib/prisma-db1';
 
 export async function GET() {
   const users = await prisma.user.findMany();

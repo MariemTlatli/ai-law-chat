@@ -11,6 +11,7 @@ const navItems = [
   { href: "/page2", label: "Dashboard", icon: <HomeIcon size={18} /> },
   { href: "/page2/docs", label: "Chats", icon: <MessageCircleIcon size={18} /> },
   { href: "/page2/users", label: "Utilisateurs", icon: <UsersIcon size={18} /> },
+  { href: "/page2/documents", label: "Documents", icon: <UsersIcon size={18} /> },
 ];
 
 const Sidebar = () => {

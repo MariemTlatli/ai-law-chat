@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "generate:db1": "prisma generate --schema=./prisma-db1/schema.prisma",
+    "generate:db2": "prisma generate --schema=./prisma-db2/schema.prisma"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -20,6 +22,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.428.0",
+    "mongoose": "^8.15.2",
     "next": "14.2.5",
     "next-auth": "^5.0.0-beta.20",
     "radix-ui": "^1.4.2",
@@ -38,6 +41,7 @@
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
     "postcss": "^8",
+    "prisma": "^6.9.0",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }

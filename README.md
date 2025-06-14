@@ -1,4 +1,11 @@
 # Setup
+dimanche :
+UI AUTH urgence /logo
+upload file prés de input 
+CRUD user 
+CRUD document +mongodb (nom + pdf )
+
+
 
 ## Install dependencies.
 ```bash

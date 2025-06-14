@@ -1,9 +1,8 @@
 // app/api/signup/route.ts
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma-db1';
 import bcrypt from 'bcryptjs';
 import { NextResponse } from 'next/server';
 
-const prisma = new PrismaClient();
 
 export async function POST(request: Request) {
   const { email, password, name } = await request.json();
