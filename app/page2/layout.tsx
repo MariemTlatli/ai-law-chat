@@ -1,30 +1,13 @@
-import { auth } from "@/auth";
-import Sidebar from "@/components/sidebar";
+// app/page2/layout.tsx (RESTE un Server Component)
+import { auth } from '@/lib/auth';
+import ClientLayout from './client-layout';
 
-
-interface LayoutProps {
-  children: React.ReactNode;
-}
-
-const Layout = async ({ children }: LayoutProps) => {
+export default async function Layout({ children }: { children: React.ReactNode }) {
   const session = await auth();
 
-  // Vérifiez si l'utilisateur est connecté et a le rôle d'administrateur
-  if (!session?.user || session.user.role !== "admin") {
+  if (!session?.user || session.user.role !== 'admin') {
     return <div>Access Denied</div>;
   }
+  return <ClientLayout>{children}</ClientLayout>;
+}
 
-  return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
-      <Sidebar />
-
-      {/* Contenu principal */}
-      <div className="flex-1 p-4">
-        {children}
-      </div>
-    </div>
-  );
-};
-
-export default Layout;

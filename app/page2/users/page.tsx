@@ -21,8 +21,8 @@ export default function UsersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Utilisateurs</h1>
-      <Link href="/page2/users/create" className="mb-4 inline-block bg-blue-600 text-white px-4 py-2 rounded">
+      <h1 className="text-2xl font-bold  ml-24">Utilisateurs</h1>
+      <Link href="/page2/users/create" className="mb-4 mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded">
         Ajouter un utilisateur
       </Link>
 
