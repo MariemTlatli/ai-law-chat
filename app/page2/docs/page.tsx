@@ -2,6 +2,13 @@
 
 import { useState } from 'react';
 import axios from 'axios';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type Message = {
   role: 'user' | 'bot';
@@ -15,56 +22,63 @@ export default function DocsPage() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!input.trim()) return;
+  const sendMessage = async () => {
+    if (!input.trim()) return;
 
-  const userMsg: Message = { role: 'user', content: input };
-  setMessages((prev) => [...prev, userMsg]);
-  setInput('');
-  setIsLoading(true);
+    const userMsg: Message = { role: 'user', content: input };
+    setMessages((prev) => [...prev, userMsg]);
+    setInput('');
+    setIsLoading(true);
 
-  try {
-    let base64File: string | null = null;
+    try {
+      let base64File: string | null = null;
 
-    if (selectedFile) {
-      // 🌟 Lire le fichier en base64 via FileReader
-      base64File = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const result = reader.result as string;
-          // Supprimer le préfixe "data:application/pdf;base64,"
-          const cleanBase64 = result.split(',')[1];
-          resolve(cleanBase64);
-        };
-        reader.onerror = () => reject("Erreur de lecture du fichier");
-        reader.readAsDataURL(selectedFile); // ← encode en base64
+      if (selectedFile) {
+        base64File = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const result = reader.result as string;
+            const cleanBase64 = result.split(',')[1]; // remove data prefix
+            resolve(cleanBase64);
+          };
+          reader.onerror = () => reject("Erreur de lecture du fichier");
+          reader.readAsDataURL(selectedFile);
+        });
+      }
+
+      const response = await axios.post('http://localhost:8000/router', {
+        current_query: input,
+        file_path: base64File,
       });
+
+      const botMsg: Message = {
+        role: 'bot',
+        content: response.data?.content || "Aucune réponse reçue.",
+      };
+
+      setMessages((prev) => [...prev, botMsg]);
+    } catch (error) {
+      console.error(error);
+      setMessages((prev) => [
+        ...prev,
+        { role: 'bot', content: "Erreur lors de la récupération de la réponse." },
+      ]);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    const response = await axios.post('http://localhost:8000/router', {
-      current_query: input,
-      file_path: base64File,
-    });
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
 
-    const botMsg: Message = {
-      role: 'bot',
-      content: response.data?.content || "Aucune réponse reçue.",
-    };
-
-    setMessages((prev) => [...prev, botMsg]);
-  } catch (error) {
-    console.error(error);
-    setMessages((prev) => [
-      ...prev,
-      { role: 'bot', content: "Erreur lors de la récupération de la réponse." },
-    ]);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+    if (!selectedFile) {
+      sendMessage(); // envoi direct si aucun fichier
+    }
+    // sinon : la boîte de dialogue a déjà été ouverte via onChange
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -75,7 +89,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         onSubmit={handleSubmit}
         className="flex flex-col mx-auto px-4 pb-6 gap-4 w-full md:max-w-3xl"
       >
-        {/* Choix du fichier PDF */}
+        {/* Sélection fichier PDF */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Sélectionner un fichier PDF :
@@ -83,7 +97,13 @@ const handleSubmit = async (e: React.FormEvent) => {
           <input
             type="file"
             accept=".pdf"
-            onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+            onChange={(e) => {
+              const file = e.target.files?.[0] || null;
+              setSelectedFile(file);
+              if (file) {
+                setIsDialogOpen(true); // ouvre la boîte directement
+              }
+            }}
             className="text-sm file:mr-4 file:py-2 file:px-4 file:border-0
                        file:font-semibold file:bg-blue-50 file:text-blue-700
                        hover:file:bg-blue-100"
@@ -95,7 +115,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           )}
         </div>
 
-        {/* Zone de message + bouton envoyer */}
+        {/* Zone de message + bouton */}
         <div className="flex gap-2">
           <MultimodalInput input={input} setInput={setInput} />
           <button
@@ -108,15 +128,29 @@ const handleSubmit = async (e: React.FormEvent) => {
         </div>
       </form>
 
-      {/* Chargement */}
+      {/* Indication de chargement */}
       {isLoading && (
-        <div className="text-center text-sm text-gray-500 mb-4">Réception de la réponse...</div>
+        <div className="text-center text-sm text-gray-500 mb-4">
+          Réception de la réponse...
+        </div>
       )}
+
+      {/* Boîte de confirmation */}
+      <ConfirmDialog
+        open={isDialogOpen}
+        onCancel={() => setIsDialogOpen(false)}
+        onConfirm={() => {
+          setIsDialogOpen(false);
+          sendMessage();
+        }}
+        fileName={selectedFile?.name}
+      />
     </div>
   );
 }
 
-export function ChatHeader() {
+// Composant d'en-tête
+function ChatHeader() {
   return (
     <div className="w-full px-4 py-3 border-b shadow-sm bg-white text-center">
       <h1 className="text-xl font-bold text-blue-700">Chat LAW</h1>
@@ -124,11 +158,12 @@ export function ChatHeader() {
   );
 }
 
-type Props1 = {
+// Composant messages
+type MessagesProps = {
   messages: Message[];
 };
 
-export function Messages({ messages }: Props1) {
+function Messages({ messages }: MessagesProps) {
   return (
     <div className="flex flex-col gap-2 p-4 max-h-[65vh] overflow-y-auto w-full md:max-w-3xl mx-auto">
       {messages.map((msg, index) => (
@@ -147,12 +182,13 @@ export function Messages({ messages }: Props1) {
   );
 }
 
-type Props = {
+// Composant input message
+type InputProps = {
   input: string;
   setInput: (value: string) => void;
 };
 
-export function MultimodalInput({ input, setInput }: Props) {
+function MultimodalInput({ input, setInput }: InputProps) {
   return (
     <input
       type="text"
@@ -161,5 +197,44 @@ export function MultimodalInput({ input, setInput }: Props) {
       value={input}
       onChange={(e) => setInput(e.target.value)}
     />
+  );
+}
+
+// Boîte de confirmation
+type ConfirmDialogProps = {
+  open: boolean;
+  onCancel: () => void;
+  onConfirm: () => void;
+  fileName?: string;
+};
+
+function ConfirmDialog({ open, onCancel, onConfirm, fileName }: ConfirmDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onCancel()}>
+      <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+        <DialogHeader>
+          <DialogTitle>Confirmer l'envoi</DialogTitle>
+          <DialogDescription>
+            Vous avez sélectionné le fichier : <strong>{fileName}</strong>.
+            <br />
+            Voulez-vous vraiment l’envoyer avec votre question ?
+          </DialogDescription>
+        </DialogHeader>
+        <div className="flex justify-end gap-2 mt-4">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+          >
+            Annuler
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Confirmer
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
