@@ -21,6 +21,7 @@ export default function ClientLayout({ children, session }: Props) {
         {isSidebarOpen ? <XIcon size={24} /> : <MenuIcon size={24} />}
       </button>
 
+      {/* {isSidebarOpen && <Sidebar session={session} />} */}
       {isSidebarOpen && <Sidebar session={session} />}
       <main className="flex-1 bg-white p-4">{children}</main>
     </div>

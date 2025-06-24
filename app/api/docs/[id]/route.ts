@@ -36,3 +36,24 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     return NextResponse.json({ error: 'Erreur suppression' }, { status: 400 });
   }
 }
+
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    await connectToDatabase();
+    const document = await Document.findById(params.id);
+
+    if (!document) {
+      return NextResponse.json({ error: 'Document non trouvé' }, { status: 404 });
+    }
+
+    return NextResponse.json(document);
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Erreur lors de la récupération du document' },
+      { status: 500 }
+    );
+  }
+}

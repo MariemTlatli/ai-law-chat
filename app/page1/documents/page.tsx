@@ -139,7 +139,7 @@ if (!confirm('Delete this document?')) return;
           
            <div className="mt-2 flex gap-2">
                   <Link 
-                    href={`/page2/documents/${doc._id}`}
+                    href={`/page1/documents/${doc._id}`}
                     className="text-blue-600 hover:underline flex items-center gap-1"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

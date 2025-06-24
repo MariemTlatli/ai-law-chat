@@ -64,11 +64,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (pathname.startsWith('/auth/signin') && isLoggedIn) {
         return Response.redirect(new URL('/', nextUrl));
       }
+      if (pathname.startsWith("/page1") && role !== "user") {
+     return Response.redirect(new URL('/', nextUrl));
+      }
 
       // Protection des pages admin
       if (pathname.startsWith("/page2") && role !== "admin") {
         return Response.redirect(new URL('/', nextUrl));
       }
+  
 
       return !!auth;
     },

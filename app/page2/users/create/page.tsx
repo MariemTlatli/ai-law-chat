@@ -18,13 +18,13 @@ export default function CreateUserPage() {
     });
 
     if (res.ok) {
-      alert('Utilisateur créé');
+      alert('User created');
     }
   };
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Ajouter un utilisateur</h1>
+      <h1 className="text-2xl font-bold mb-4">Add a User</h1>
       <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
         <input
           type="email"
@@ -36,7 +36,7 @@ export default function CreateUserPage() {
         />
         <input
           type="password"
-          placeholder="Mot de passe"
+          placeholder="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
@@ -44,7 +44,7 @@ export default function CreateUserPage() {
         />
         <input
           type="text"
-          placeholder="Nom (optionnel)"
+          placeholder="Name (optional)"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="w-full border p-2"
@@ -54,14 +54,14 @@ export default function CreateUserPage() {
           onChange={(e) => setRole(e.target.value)}
           className="w-full border p-2"
         >
-          <option value="user">User</option>
+          <option value="user">Lawyer</option>
           <option value="admin">Admin</option>
         </select>
         <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded">
-          Créer
+          Create
         </button>
         <Link href="/page2/users" className="block text-blue-600 mt-2">
-          Retour
+          Back
         </Link>
       </form>
     </div>

@@ -8,8 +8,8 @@ export default async function Navbar() {
   const session = await auth();
   console.log({ session });
   return (
-    <nav className="flex justify-between items-center py-3 px-4 bg-white shadow-md">
-      <Link href="/" className="text-xl font-bold">
+    <nav className="">
+      {/* <Link href="/" className="text-xl font-bold">
        <Image
           src={logo}
           alt="Logo"
@@ -28,7 +28,7 @@ export default async function Navbar() {
             Sign Out
           </Button>
         </form>
-      )}
+      )} */}
     </nav>
   );
 }

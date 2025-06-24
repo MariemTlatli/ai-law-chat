@@ -18,7 +18,7 @@ export default function EditUserPage() {
     fetch(`/api/users/${id}`).then((res) => res.json()).then(setUser);
   }, [id]);
 
-  if (!user) return <p>Chargement...</p>;
+  if (!user) return <p>Loading...</p>;
 
   return (
     <EditUserForm user={user} />
@@ -40,13 +40,13 @@ function EditUserForm({ user }: { user: User }) {
     });
 
     if (res.ok) {
-      alert('Utilisateur mis à jour');
+      alert('User updated.');
     }
   };
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Modifier l'utilisateur</h1>
+      <h1 className="text-2xl font-bold mb-4">Edit User</h1>
       <form onSubmit={handleSubmit} className="space-y-4 max-w-md">
         <input
           type="email"
@@ -65,7 +65,7 @@ function EditUserForm({ user }: { user: User }) {
         />
         <input
           type="text"
-          placeholder="Nom"
+          placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="w-full border p-2"
@@ -75,11 +75,11 @@ function EditUserForm({ user }: { user: User }) {
           onChange={(e) => setRole(e.target.value)}
           className="w-full border p-2"
         >
-          <option value="user">User</option>
+          <option value="user">Lawyer</option>
           <option value="admin">Admin</option>
         </select>
         <button type="submit" className="bg-yellow-600 text-white px-4 py-2 rounded">
-          Mettre à jour
+          Update
         </button>
       </form>
     </div>
